@@ -79,7 +79,7 @@ function firstValue(row, keys) {
 
 function splitMultiValue(value) {
   return normalizeValue(value)
-    .split("|")
+    .split(/\s*\|\s*|\s*,\s*|\s*，\s*/)
     .map((part) => part.trim())
     .filter(Boolean);
 }
