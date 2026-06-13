@@ -242,8 +242,15 @@ function renderResults(records) {
         <article class="result-card">
           <div class="result-meta">
             ${record.organization ? `<p class="result-organization">${escapeHtml(record.organization)}</p>` : ""}
-            ${record.title ? `<h3 class="result-title">${escapeHtml(record.title)}</h3>` : ""}
-            ${safeUrl ? `<a class="result-link" href="${escapeHtml(safeUrl)}" target="_blank" rel="noreferrer">公式ページ</a>` : ""}
+            ${
+              record.title
+                ? `<h3 class="result-title">${
+                    safeUrl
+                      ? `<a class="result-title-link" href="${escapeHtml(safeUrl)}" target="_blank" rel="noreferrer">${escapeHtml(record.title)}</a>`
+                      : escapeHtml(record.title)
+                  }</h3>`
+                : ""
+            }
           </div>
           <dl class="result-grid">
             ${renderFact(DISPLAY_LABELS.destinationCountries, record.destinationCountries.join(" / "))}

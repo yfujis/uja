@@ -259,16 +259,6 @@ button:focus-visible,
   line-height: 1.35;
 }
 
-.result-link {
-  justify-self: start;
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--accent-strong);
-  text-decoration: none;
-  background: rgba(31, 106, 82, 0.05);
-}
-
 .result-grid {
   display: grid;
   gap: 12px;
@@ -289,6 +279,18 @@ button:focus-visible,
 
 .result-grid dd {
   margin: 6px 0 0;
+}
+
+.result-title-link {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.result-title-link:hover {
+  color: var(--accent-strong);
+  border-color: rgba(31, 106, 82, 0.35);
 }
 
 .empty-state {
