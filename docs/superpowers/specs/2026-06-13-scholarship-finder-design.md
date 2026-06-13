@@ -2,20 +2,22 @@
 
 ## Summary
 
-Build a static GitHub Pages website that helps Japanese students and researchers search for scholarships and fellowships they may be eligible for. The site will use a repo-stored, cleaned JSON snapshot derived from the published spreadsheet and provide fast client-side search and filtering with no backend.
+Build a static GitHub Pages website that helps Japanese students and researchers search for scholarships and fellowships they may be eligible for. The site will fetch the published Google Sheets CSV directly in the browser, reflect new spreadsheet edits without a repo data refresh, and provide fast client-side search and filtering with no backend.
 
 ## Goals
 
 - Make the funding dataset easy to search and browse on desktop and mobile.
 - Help users narrow opportunities by eligibility-related filters instead of scanning a spreadsheet manually.
 - Keep deployment and maintenance simple enough for GitHub Pages.
+- Let collaborators update the spreadsheet and have the website reflect those changes automatically.
 
 ## Non-Goals
 
 - No user accounts, saved searches, or personalization in v1.
 - No server-side database or dynamic API.
 - No separate detail page per funding opportunity in v1.
-- No live sync with Google Sheets in v1.
+- No admin UI inside the website.
+- No write-back from the website to Google Sheets.
 
 ## Users
 
@@ -23,142 +25,169 @@ The first release targets both Japanese students and Japanese researchers lookin
 
 ## Source Data
 
-The source is a published Google Sheets CSV containing scholarship and fellowship records. The live sheet will not be queried directly by the deployed site in v1. Instead, the repo will contain a cleaned JSON snapshot generated from the spreadsheet.
+The source is a published Google Sheets CSV containing scholarship and fellowship records. The deployed site will query that published CSV directly at runtime.
 
-Relevant source columns observed in the sheet include:
+The canonical contributor-facing schema is documented in `docs/data-model/scholarship-sheet-schema.md`. The app should align to that schema first and tolerate partially filled rows or temporary missing columns gracefully.
 
-- `更新日`
-- `CDWGdb_ID`
-- `運営団体`
-- `支援制度名`
-- `URL_latest`
-- `留学先国`
-- `留学目的`
-- `対象分野`
-- `支援形式`
-- `支援内容`
-- `他助成との重複`
-- `要件(抜粋)`
-- `募集期間 (実施年)`
-- `年齢`
-- `国籍`
-- `学歴`
-- `言語`
-- `その他`
-- `募集開始`
-- `募集終了`
-- `コメント`
-- `留学タイプ`
-- `対象留学区分`
+Key columns expected from the current sheet include:
 
-The source sheet also contains extra blank or noisy columns, so the app should only depend on a curated subset.
+- `record_id`
+- `source_status`
+- `last_checked_date`
+- `organization_ja`
+- `program_name_ja`
+- `program_name_en`
+- `source_url`
+- `summary_ja`
+- `support_details_ja`
+- `application_period_text_ja`
+- `public_notes_ja`
+- `eligible_nationalities`
+- `eligible_education_levels`
+- `eligible_study_types`
+- `eligible_program_categories`
+- `eligible_purposes`
+- `eligible_fields`
+- `eligible_destination_countries`
+- `age_requirement_text`
+- `language_requirement_text`
+- `affiliation_requirement_text`
+- `career_stage_text`
+- `other_requirement_text`
+- `funding_type`
+- `destination_country_text`
+- `overlap_policy_text`
+- `application_open_date`
+- `application_close_date`
+- `application_cycle_text`
 
-## Data Model
+The app should ignore internal-only fields such as `notes_internal` and should skip unknown blank columns instead of failing.
 
-The cleaned JSON dataset should map each funding record into a consistent internal shape:
+## Runtime Data Model
 
-- `id`
-- `updatedAt`
-- `organization`
-- `title`
-- `sourceUrl`
-- `destinationCountry`
-- `purpose`
-- `field`
-- `fundingType`
-- `supportDetails`
-- `overlapPolicy`
-- `eligibilitySummary`
-- `applicationPeriodText`
-- `ageRequirement`
-- `nationalityRequirement`
-- `educationRequirement`
-- `languageRequirement`
-- `otherRequirement`
-- `applicationStart`
-- `applicationEnd`
-- `comment`
-- `studyType`
-- `programCategory`
+The browser should parse the CSV header row dynamically and normalize each record into a consistent internal shape for filtering and rendering. The internal shape can use English code identifiers, but it should derive directly from the live schema:
 
-Empty values should be normalized to empty strings or omitted in the rendered UI. The app should avoid exposing raw spreadsheet artifacts such as unnamed columns.
+- `id` from `record_id`
+- `sourceStatus` from `source_status`
+- `lastCheckedDate` from `last_checked_date`
+- `organization` from `organization_ja`
+- `title` from `program_name_ja`
+- `titleEn` from `program_name_en`
+- `sourceUrl` from `source_url`
+- `summary` from `summary_ja`
+- `supportDetails` from `support_details_ja`
+- `applicationPeriodText` from `application_period_text_ja`
+- `publicNotes` from `public_notes_ja`
+- `nationalities` from `eligible_nationalities`
+- `educationLevels` from `eligible_education_levels`
+- `studyTypes` from `eligible_study_types`
+- `programCategories` from `eligible_program_categories`
+- `purposes` from `eligible_purposes`
+- `fields` from `eligible_fields`
+- `destinationCountries` from `eligible_destination_countries`
+- `ageRequirementText` from `age_requirement_text`
+- `languageRequirementText` from `language_requirement_text`
+- `affiliationRequirementText` from `affiliation_requirement_text`
+- `careerStageText` from `career_stage_text`
+- `otherRequirementText` from `other_requirement_text`
+- `fundingType` from `funding_type`
+- `destinationCountryText` from `destination_country_text`
+- `overlapPolicyText` from `overlap_policy_text`
+- `applicationOpenDate` from `application_open_date`
+- `applicationCloseDate` from `application_close_date`
+- `applicationCycleText` from `application_cycle_text`
+
+Multi-value controlled fields should be split on `|`, matching the schema guidance. Empty values should normalize to empty strings or empty arrays. Internal-only fields must not be rendered publicly.
+
+For presentation purposes, the UI should also produce:
+
+- `searchText`: one concatenated searchable string built from every public text field in the row
+- `eligibilityBlocks`: labeled sections assembled from the structured eligibility columns
 
 ## Site Architecture
 
-The project will be a plain HTML, CSS, and JavaScript static site suitable for GitHub Pages. The site will load a local JSON file at runtime and render the full search interface in the browser.
+The project will be a plain HTML, CSS, and JavaScript static site suitable for GitHub Pages. The site will fetch the published CSV at runtime and render the full search interface in the browser.
 
 Expected structure:
 
 - `index.html` for the main page
 - `styles.css` for layout and visual design
-- `script.js` for data loading, normalization, filtering, and rendering
-- `data/*.json` for the cleaned funding dataset
+- `script.js` for CSV fetching, parsing, normalization, filtering, and rendering
 
-No build framework is required for v1 unless a small local script is added later to regenerate the JSON snapshot.
+No build framework is required for v1.
 
 ## User Experience
 
 The homepage is the product. Users should immediately see:
 
 - A search input for free-text matching
-- A filter area for narrowing opportunities
+- A filter area for narrowing opportunities with tag-like categorical choices
 - A results area that updates based on the current query and filters
 
-Results should display as:
+The website UI should be in Japanese for the first release. Navigation labels, form labels, helper text, empty states, status messages, and result actions should all be written in Japanese. Internal code identifiers may remain English.
 
-- Mobile: stacked cards
-- Desktop: compact table-like rows with expandable inline details
+Results should display as stacked cards on both mobile and desktop in v1. Cards may become denser on wide screens, but the interface does not need a separate desktop table layout if that complicates the live-schema implementation.
 
 Each result should show the most useful summary fields first, such as title, organization, destination country, purpose, funding type, and date information. Expanding a result should reveal detailed eligibility and support information without navigating to a new page.
 
+The website should explicitly show these source-backed fields in the result UI:
+
+- `organization_ja`
+- `program_name_ja`
+- `program_name_en` when available
+- `source_url`
+- `eligible_destination_countries` or `destination_country_text`
+- `eligible_purposes`
+- `eligible_fields`
+- `funding_type`
+- `application_period_text_ja`
+- `summary_ja`
+- eligibility details assembled from the structured eligibility columns
+
+Fields with no data for a row should be omitted from that card instead of showing empty placeholders.
+
 ## Search Behavior
 
-The keyword search should match across the most meaningful text fields, including:
-
-- title
-- organization
-- purpose
-- field
-- eligibility summary
-- support details
-- comments
+The keyword search should match across every public text field available in a row, not just the fields displayed in the collapsed card. This includes names, summary text, support details, purpose values, field values, country values, eligibility text, notes, and human-readable timing text.
 
 Search should be case-insensitive where relevant and should support Japanese text naturally by using substring matching instead of English-centric token assumptions.
 
 ## Filters
 
-The first release should prioritize filters that help users determine eligibility quickly:
+The first release should auto-generate filters from stable categorical columns in the live sheet schema rather than relying on a frozen hand-maintained list. The initial visible filters should prioritize:
 
-- Purpose (`留学目的`)
-- Field (`対象分野`)
-- Funding type (`支援形式`)
-- Destination country (`留学先国`)
-- Nationality requirement (`国籍`)
-- Education requirement (`学歴`)
-- Language requirement (`言語`)
-- Study type (`留学タイプ`) if present and useful
-- Program category (`対象留学区分`) if present and useful
+- `eligible_purposes`
+- `eligible_fields`
+- `funding_type`
+- `eligible_destination_countries`
+- `eligible_nationalities`
+- `eligible_education_levels`
+- `eligible_study_types`
+- `eligible_program_categories`
 
-If application start and end dates are consistent enough after cleaning, the UI may also include a simple application-status filter such as open, upcoming, closed, or unknown. If the date quality is too inconsistent, the first release should display dates without using them as a primary filter.
+The UI should present these as tags or chips that can be toggled on and off, rather than only as single-select dropdowns. Within one filter group, selecting multiple tags should behave as OR. Across different filter groups, active filters should combine as AND.
 
-## Data Refresh Workflow
+If a categorical column is completely absent or blank in the live sheet, the site should omit that filter group automatically.
 
-The JSON file in the repo is the canonical dataset for the deployed site. Updating the site should be a simple refresh flow:
+## Live Data Refresh
 
-1. Fetch or copy the latest spreadsheet data locally.
-2. Clean and convert it into the repo JSON format.
-3. Commit the updated data file.
-4. Redeploy via GitHub Pages.
+The published Google Sheet is the canonical dataset for the deployed site. The refresh workflow should be:
 
-This manual workflow is acceptable for v1 and avoids adding fragile live integrations too early.
+1. A collaborator edits the main Google Sheet.
+2. The published CSV reflects that change once Google publish output updates.
+3. The website fetches the latest CSV on the next page load.
+
+No repo data regeneration step is required for routine content updates.
 
 ## Error Handling
 
 The site should fail gracefully:
 
-- If the JSON file cannot be loaded, show a clear error message instead of a blank page.
+- If the CSV cannot be loaded, show a clear error message instead of a blank page.
+- If the CSV header changes unexpectedly, ignore unknown columns and continue rendering from recognized public columns when possible.
 - If a record is missing a field, hide that field in the UI rather than showing broken placeholders.
 - If filtering yields no matches, show a friendly empty-state message and encourage users to broaden filters.
+- If the CSV contains quoted commas or line breaks, parsing logic must preserve row integrity instead of splitting incorrectly.
 
 ## Accessibility
 
@@ -168,27 +197,34 @@ The interface should be keyboard-usable and readable on both desktop and mobile.
 
 The interface should feel more like a focused research directory than a raw spreadsheet. It should be clean and efficient, with strong readability for dense text and a clear visual hierarchy between summary information and expanded details.
 
+Because the audience is Japanese-speaking, typography and spacing should be chosen so Japanese text remains readable in long field values such as eligibility notes and target field descriptions.
+
 ## Testing
 
 Before calling v1 complete, verify:
 
-- The JSON dataset loads successfully on the static site.
+- The published CSV loads successfully on the static site.
+- CSV parsing handles quoted values, commas, and multiline cells from Google Sheets output.
 - Free-text search returns expected results for Japanese text.
-- Multiple filters combine correctly.
+- Free-word search covers every public text field in a row.
+- Multiple tag filters combine correctly.
 - Inline expand/collapse works on mobile and desktop.
 - The site renders correctly under a GitHub Pages project path.
 - Missing or partial data does not break rendering.
+- Adding or editing a spreadsheet row is reflected on the site without updating repo data files.
 
 ## Open Decisions Resolved
 
 - Hosting: GitHub Pages
 - Stack: plain HTML, CSS, JavaScript
-- Data source in deployed app: local repo snapshot, not live Google Sheets
-- Data format in repo: cleaned JSON
+- Data source in deployed app: live published Google Sheets CSV
+- Data refresh model: fetch live sheet on page load
 - Audience: both students and researchers
-- Result layout: cards on mobile, table-like rows on desktop
+- Result layout: responsive cards with inline details
 - Detail interaction: inline expansion only
+- Search scope: every public text field in each row
+- Filter strategy: auto-generated live tag filters from stable categorical columns
 
 ## Implementation Boundary
 
-This spec covers a single v1 project and is focused enough for one implementation plan. It does not include future automation for syncing data, multilingual UI expansion, or advanced ranking logic.
+This spec covers a single v1 project and is focused enough for one implementation plan. It does not include spreadsheet authentication, collaborator permissions, multilingual UI expansion, or advanced ranking logic.
