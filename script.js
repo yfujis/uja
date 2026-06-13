@@ -18,6 +18,7 @@ const DISPLAY_LABELS = {
 };
 
 const HEADER_ALIASES = {
+  visibility: ["Show", "show"],
   organization: ["organization_ja", "運営団体"],
   title: ["program_name_ja", "プログラム名"],
   sourceUrl: ["source_url", "URL"],
@@ -156,6 +157,7 @@ function getDeadlineValue(row) {
 }
 
 export function normalizeRow(row) {
+  const visibility = firstValue(row, HEADER_ALIASES.visibility);
   const organization = firstValue(row, HEADER_ALIASES.organization);
   const title = firstValue(row, HEADER_ALIASES.title);
   const sourceUrl = firstValue(row, HEADER_ALIASES.sourceUrl);
@@ -166,6 +168,7 @@ export function normalizeRow(row) {
 
   return {
     id: normalizeValue(row.record_id) || sourceUrl || `${organization}-${title}`,
+    isVisible: visibility !== "0",
     organization,
     title,
     sourceUrl,
@@ -337,7 +340,7 @@ async function loadRecords() {
   const csvText = await response.text();
   return parseCsv(csvText)
     .map(normalizeRow)
-    .filter((record) => record.title || record.organization);
+    .filter((record) => record.isVisible && (record.title || record.organization));
 }
 
 function bindEvents() {
