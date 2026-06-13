@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>奨学金・フェローシップ検索</title>
+    <meta
+      name="description"
+      content="日本人学生・研究者向けの奨学金・フェローシップ情報を、日本語で検索・絞り込みできるデータベースです。"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="hero">
+        <p class="eyebrow">助成金データベース</p>
+        <h1>日本人学生・研究者向け 奨学金・フェローシップ検索</h1>
+        <p class="hero-copy">
+          公開データをもとにした助成制度情報を、応募条件にあわせて検索できます。
+        </p>
+        <p id="data-warning" class="data-warning">
+          データの最終更新日を確認し、応募前に必ず公式サイトの最新募集要項をご確認ください。
+        </p>
+      </header>
+
+      <main class="layout">
+        <aside class="filters" aria-label="検索フィルター">
+          <form id="search-form" class="filters-form">
+            <label class="field">
+              <span>キーワード検索</span>
+              <input
+                id="keyword-input"
+                name="keyword"
+                type="search"
+                placeholder="支援制度名、運営団体、対象分野、応募条件などで検索"
+              />
+            </label>
+
+            <p class="filters-help">
+              キーワード検索と絞り込み条件を組み合わせて、応募できそうな制度を探せます。
+            </p>
+
+            <label class="field">
+              <span>留学目的</span>
+              <select id="purpose-filter" name="purpose">
+                <option value="">すべて</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>対象分野</span>
+              <select id="field-filter" name="field">
+                <option value="">すべて</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>支援形式</span>
+              <select id="funding-type-filter" name="fundingType">
+                <option value="">すべて</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>留学先国</span>
+              <select id="destination-filter" name="destinationCountry">
+                <option value="">すべて</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>国籍</span>
+              <select id="nationality-filter" name="nationalityRequirement">
+                <option value="">すべて</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>学歴</span>
+              <select id="education-filter" name="educationRequirement">
+                <option value="">すべて</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>言語</span>
+              <select id="language-filter" name="languageRequirement">
+                <option value="">すべて</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>留学タイプ</span>
+              <select id="study-type-filter" name="studyType">
+                <option value="">すべて</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>対象留学区分</span>
+              <select id="program-category-filter" name="programCategory">
+                <option value="">すべて</option>
+              </select>
+            </label>
+
+            <button type="button" id="clear-filters">条件をクリア</button>
+          </form>
+        </aside>
+
+        <section class="results-panel" aria-labelledby="results-heading">
+          <div class="results-toolbar">
+            <div>
+              <h2 id="results-heading">検索結果</h2>
+              <p class="results-caption">条件に合う制度を一覧表示します。</p>
+            </div>
+            <p id="results-count" aria-live="polite">データを読み込んでいます...</p>
+          </div>
+
+          <div id="status-message" class="status-message" role="status" hidden></div>
+          <div id="results" class="results-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js" type="module"></script>
+  </body>
+</html>
