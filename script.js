@@ -1,5 +1,5 @@
 const CSV_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRDmhP7BnaG5zxWE0YcfTK50ihAyHHn0JVHImnHw7ppcKBb4oQ1-WI2LdYoZQzyqCK2cTx6ccwqauFQ/pub?gid=29113515&single=true&output=csv";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRDmhP7BnaG5zxWE0YcfTK50ihAyHHn0JVHImnHw7ppcKBb4oQ1-WI2LdYoZQzyqCK2cTx6ccwqauFQ/pub?gid=974911207&single=true&output=csv";
 
 export const FILTER_DEFINITIONS = [
   { key: "destinationCountries", label: "留学先国" },
