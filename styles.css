@@ -99,7 +99,7 @@ a {
 .hero h1 {
   margin: 0;
   max-width: none;
-  font-size: clamp(2.25rem, 5vw, 4.4rem);
+  font-size: clamp(2.25rem, 5vw, 4rem);
   line-height: 1.08;
   letter-spacing: -0.03em;
   text-wrap: balance;
