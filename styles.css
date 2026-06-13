@@ -59,6 +59,23 @@ a {
   overflow: hidden;
 }
 
+.hero-brand {
+  display: grid;
+  gap: 18px;
+  align-items: center;
+}
+
+.hero-copy-block {
+  display: grid;
+  gap: 0;
+}
+
+.hero-logo {
+  width: clamp(96px, 18vw, 144px);
+  height: auto;
+  filter: drop-shadow(0 10px 24px rgba(47, 40, 24, 0.16));
+}
+
 .hero::after {
   content: "";
   position: absolute;
@@ -298,6 +315,11 @@ button:focus-visible,
   .layout {
     grid-template-columns: 320px 1fr;
     align-items: start;
+  }
+
+  .hero-brand {
+    grid-template-columns: auto 1fr;
+    gap: 24px;
   }
 
   .results-toolbar {
