@@ -21,7 +21,7 @@ html {
 
 body {
   margin: 0;
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   color: var(--ink);
   background:
     radial-gradient(circle at top left, rgba(196, 174, 126, 0.28), transparent 28%),
