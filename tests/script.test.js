@@ -23,6 +23,7 @@ test("normalizeRow keeps only public display fields and searchable text", () => 
   const record = normalizeRow(row);
   assert.equal(record.title, "Program One");
   assert.deepEqual(record.destinationCountries, ["米国", "カナダ"]);
+  assert.deepEqual(record.deadlineMonths, ["7月"]);
   assert.match(record.searchText, /家族帯同可/);
 });
 
@@ -33,7 +34,8 @@ test("filterRecords applies keyword and tag filters together", () => {
     activeFilters: {
       destinationCountries: new Set(["米国"]),
       purposes: new Set(["研究"]),
-      fields: new Set()
+      fields: new Set(),
+      deadlineMonths: new Set(["7月"])
     }
   });
 
@@ -44,6 +46,6 @@ test("filterRecords applies keyword and tag filters together", () => {
 test("FILTER_DEFINITIONS describes the visible tag groups", () => {
   assert.deepEqual(
     FILTER_DEFINITIONS.map((definition) => definition.key),
-    ["destinationCountries", "purposes", "fields"]
+    ["destinationCountries", "purposes", "fields", "deadlineMonths"]
   );
 });

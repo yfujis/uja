@@ -4,7 +4,8 @@ const CSV_URL =
 export const FILTER_DEFINITIONS = [
   { key: "destinationCountries", label: "留学先国" },
   { key: "purposes", label: "留学目的" },
-  { key: "fields", label: "対象分野" }
+  { key: "fields", label: "対象分野" },
+  { key: "deadlineMonths", label: "募集月" }
 ];
 
 const DISPLAY_LABELS = {
@@ -156,6 +157,33 @@ function getDeadlineValue(row) {
   return firstValue(row, ["application_period_text_ja", "募集期間", "募集期間 (実施年)"]);
 }
 
+function extractDeadlineMonths(value) {
+  const raw = normalizeValue(value);
+  if (!raw) {
+    return [];
+  }
+
+  const months = new Set();
+  const patterns = [
+    /(\d{4})-(\d{1,2})-(\d{1,2})/g,
+    /(\d{4})\/(\d{1,2})\/(\d{1,2})/g,
+    /(^|[^\d])(\d{1,2})月/g,
+    /(^|[^\d])(\d{1,2})\/\d{1,2}(?!\d)/g
+  ];
+
+  for (const pattern of patterns) {
+    for (const match of raw.matchAll(pattern)) {
+      const monthText = match[2];
+      const month = Number(monthText);
+      if (month >= 1 && month <= 12) {
+        months.add(`${month}月`);
+      }
+    }
+  }
+
+  return [...months];
+}
+
 export function normalizeRow(row) {
   const visibility = firstValue(row, HEADER_ALIASES.visibility);
   const organization = firstValue(row, HEADER_ALIASES.organization);
@@ -165,6 +193,7 @@ export function normalizeRow(row) {
   const purposes = splitMultiValue(firstValue(row, HEADER_ALIASES.purposes));
   const fields = splitMultiValue(firstValue(row, HEADER_ALIASES.fields));
   const deadline = getDeadlineValue(row);
+  const deadlineMonths = extractDeadlineMonths(deadline);
 
   return {
     id: normalizeValue(row.record_id) || sourceUrl || `${organization}-${title}`,
@@ -176,6 +205,7 @@ export function normalizeRow(row) {
     purposes,
     fields,
     deadline,
+    deadlineMonths,
     searchText: buildSearchText(Object.values(row))
   };
 }
