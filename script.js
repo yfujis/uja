@@ -160,7 +160,7 @@ function getDeadlineValue(row) {
 function extractDeadlineMonths(value) {
   const raw = normalizeValue(value);
   if (!raw) {
-    return [];
+    return ["その他"];
   }
 
   const months = new Set();
@@ -179,6 +179,10 @@ function extractDeadlineMonths(value) {
         months.add(`${month}月`);
       }
     }
+  }
+
+  if (months.size === 0) {
+    return ["その他"];
   }
 
   return [...months];

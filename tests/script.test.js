@@ -49,3 +49,12 @@ test("FILTER_DEFINITIONS describes the visible tag groups", () => {
     ["destinationCountries", "purposes", "fields", "deadlineMonths"]
   );
 });
+
+test("normalizeRow maps missing or non-month deadline info to その他", () => {
+  const records = parseCsv(`運営団体,プログラム名,募集期限
+"C Foundation","Program Three","複数回"
+"D Foundation","Program Four",""`).map(normalizeRow);
+
+  assert.deepEqual(records[0].deadlineMonths, ["その他"]);
+  assert.deepEqual(records[1].deadlineMonths, ["その他"]);
+});
