@@ -68,6 +68,7 @@ a {
 .hero-copy-block {
   display: grid;
   gap: 0;
+  min-width: 0;
 }
 
 .hero-logo {
@@ -97,10 +98,11 @@ a {
 
 .hero h1 {
   margin: 0;
-  max-width: 18ch;
+  max-width: none;
   font-size: clamp(2.25rem, 5vw, 4.4rem);
   line-height: 1.08;
   letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 .hero-copy {
@@ -314,21 +316,18 @@ button:focus-visible,
   }
 
   .hero-brand {
-    grid-template-columns: auto;
-    gap: 16px;
-    max-width: 960px;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 20px;
+    max-width: 1100px;
+    align-items: center;
   }
 
   .hero-copy-block {
-    max-width: 860px;
+    max-width: none;
   }
 
   .hero-logo {
-    width: 72px;
-  }
-
-  .hero h1 {
-    max-width: 14ch;
+    width: 88px;
   }
 
   .results-toolbar {
@@ -342,12 +341,15 @@ button:focus-visible,
 }
 
 @media (max-width: 899px) {
+  .hero-brand {
+    grid-template-columns: 1fr;
+  }
+
   .hero-logo {
     width: 64px;
   }
 
   .hero h1 {
-    max-width: none;
     font-size: clamp(2rem, 10vw, 3.2rem);
     line-height: 1.12;
   }
