@@ -32,7 +32,6 @@ const hasDocument = typeof document !== "undefined";
 const resultsElement = hasDocument ? document.getElementById("results") : null;
 const resultsCountElement = hasDocument ? document.getElementById("results-count") : null;
 const statusMessageElement = hasDocument ? document.getElementById("status-message") : null;
-const dataWarningElement = hasDocument ? document.getElementById("data-warning") : null;
 const formElement = hasDocument ? document.getElementById("search-form") : null;
 const filterGroupsElement = hasDocument ? document.getElementById("filter-groups") : null;
 const clearFiltersButton = hasDocument ? document.getElementById("clear-filters") : null;
@@ -300,20 +299,6 @@ function renderFilterGroups(records) {
   }).join("");
 }
 
-function updateDataWarning(records) {
-  if (!dataWarningElement) {
-    return;
-  }
-
-  const latest = records
-    .map((record) => record.deadline)
-    .find(Boolean);
-
-  dataWarningElement.textContent = latest
-    ? `公開中のスプレッドシートをもとに表示しています。募集期限は ${latest} など、応募前に必ず公式サイトの最新情報をご確認ください。`
-    : "公開中のスプレッドシートをもとに表示しています。応募前に必ず公式サイトの最新情報をご確認ください。";
-}
-
 function getKeyword() {
   if (!formElement) {
     return "";
@@ -395,7 +380,6 @@ async function initializeApp() {
 
   try {
     appState.records = await loadRecords();
-    updateDataWarning(appState.records);
     renderFilterGroups(appState.records);
     applyFilters();
   } catch (error) {
