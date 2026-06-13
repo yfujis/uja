@@ -61,8 +61,8 @@ a {
 
 .hero-brand {
   display: grid;
-  gap: 18px;
-  align-items: center;
+  gap: 14px;
+  align-items: start;
 }
 
 .hero-copy-block {
@@ -71,9 +71,10 @@ a {
 }
 
 .hero-logo {
-  width: clamp(96px, 18vw, 144px);
+  width: clamp(56px, 9vw, 76px);
   height: auto;
-  filter: drop-shadow(0 10px 24px rgba(47, 40, 24, 0.16));
+  border-radius: 18px;
+  filter: drop-shadow(0 6px 16px rgba(47, 40, 24, 0.1));
 }
 
 .hero::after {
@@ -96,15 +97,17 @@ a {
 
 .hero h1 {
   margin: 0;
-  max-width: 14ch;
-  font-size: clamp(2rem, 4vw, 3.2rem);
-  line-height: 1.15;
+  max-width: 11ch;
+  font-size: clamp(2.1rem, 4.6vw, 4rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
 }
 
 .hero-copy {
-  margin: 16px 0 0;
-  max-width: 48rem;
+  margin: 14px 0 0;
+  max-width: 42rem;
   color: var(--muted);
+  font-size: 1.02rem;
 }
 
 .data-warning {
@@ -318,8 +321,9 @@ button:focus-visible,
   }
 
   .hero-brand {
-    grid-template-columns: auto 1fr;
-    gap: 24px;
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
   }
 
   .results-toolbar {
