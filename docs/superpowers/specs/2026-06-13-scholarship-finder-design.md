@@ -128,27 +128,33 @@ The website UI should be in Japanese for the first release. Navigation labels, f
 
 Results should display as stacked cards on both mobile and desktop in v1. Cards may become denser on wide screens, but the interface does not need a separate desktop table layout if that complicates the live-schema implementation.
 
-Each result should show the most useful summary fields first, such as title, organization, destination country, purpose, funding type, and date information. Expanding a result should reveal detailed eligibility and support information without navigating to a new page.
+Each result should show only the agreed public summary fields and should not expose the rest of the sheet contents in the visible card body.
 
 The website should explicitly show these source-backed fields in the result UI:
 
-- `organization_ja`
-- `program_name_ja`
-- `program_name_en` when available
-- `source_url`
-- `eligible_destination_countries` or `destination_country_text`
-- `eligible_purposes`
-- `eligible_fields`
-- `funding_type`
-- `application_period_text_ja`
-- `summary_ja`
-- eligibility details assembled from the structured eligibility columns
+- `運営団体`
+- `プログラム名`
+- `URL`
+- `留学先国`
+- `留学目的`
+- `対象分野`
+- `募集期限`
 
-Fields with no data for a row should be omitted from that card instead of showing empty placeholders.
+In the live sheet schema, the app should map these display fields from the currently published headers or their canonical equivalents:
+
+- `運営団体` from `organization_ja` or the legacy Japanese header if the live sheet still uses it
+- `プログラム名` from `program_name_ja` or the legacy Japanese header if the live sheet still uses it
+- `URL` from `source_url` or the legacy Japanese header if the live sheet still uses it
+- `留学先国` from `eligible_destination_countries`, `destination_country_text`, or the legacy Japanese header depending on the published sheet shape
+- `留学目的` from `eligible_purposes` or the legacy Japanese header depending on the published sheet shape
+- `対象分野` from `eligible_fields` or the legacy Japanese header depending on the published sheet shape
+- `募集期限` from the most user-facing deadline field available in the live sheet, preferring an explicit deadline column if present
+
+Fields with no data for a row should be omitted from that card instead of showing empty placeholders. Non-displayed public fields may still be used for search indexing and filter generation.
 
 ## Search Behavior
 
-The keyword search should match across every public text field available in a row, not just the fields displayed in the collapsed card. This includes names, summary text, support details, purpose values, field values, country values, eligibility text, notes, and human-readable timing text.
+The keyword search should match across every public text field available in a row, not just the fields displayed in the visible card. This includes the displayed summary fields plus any additional public notes or eligibility-related text present in the live sheet.
 
 Search should be case-insensitive where relevant and should support Japanese text naturally by using substring matching instead of English-centric token assumptions.
 
@@ -166,6 +172,8 @@ The first release should auto-generate filters from stable categorical columns i
 - `eligible_program_categories`
 
 The UI should present these as tags or chips that can be toggled on and off, rather than only as single-select dropdowns. Within one filter group, selecting multiple tags should behave as OR. Across different filter groups, active filters should combine as AND.
+
+Even though the site may use additional live sheet columns for filtering and search, the public result presentation should stay limited to the seven visible fields above.
 
 If a categorical column is completely absent or blank in the live sheet, the site should omit that filter group automatically.
 
@@ -208,7 +216,7 @@ Before calling v1 complete, verify:
 - Free-text search returns expected results for Japanese text.
 - Free-word search covers every public text field in a row.
 - Multiple tag filters combine correctly.
-- Inline expand/collapse works on mobile and desktop.
+- The visible results show only the seven agreed fields.
 - The site renders correctly under a GitHub Pages project path.
 - Missing or partial data does not break rendering.
 - Adding or editing a spreadsheet row is reflected on the site without updating repo data files.
@@ -220,8 +228,8 @@ Before calling v1 complete, verify:
 - Data source in deployed app: live published Google Sheets CSV
 - Data refresh model: fetch live sheet on page load
 - Audience: both students and researchers
-- Result layout: responsive cards with inline details
-- Detail interaction: inline expansion only
+- Result layout: responsive cards with no required expanded detail section
+- Detail interaction: none required in v1 unless later needed for usability
 - Search scope: every public text field in each row
 - Filter strategy: auto-generated live tag filters from stable categorical columns
 
